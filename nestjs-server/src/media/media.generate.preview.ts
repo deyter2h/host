@@ -5,18 +5,17 @@ import fs from 'fs/promises';
 import sharp from 'sharp';
 import ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import { VARS } from 'src/vars.enum';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-
-const PREVIEW_DIR = 'C:/my-site/uploads/previews';
 
 export async function generatePreview(
   file: Express.Multer.File,
 ): Promise<string> {
   const { name: baseName } = path.parse(file.filename);
   const previewFilename = `${baseName}.jpg`;
-  await fs.mkdir(PREVIEW_DIR, { recursive: true });
-  const previewPath = path.join(PREVIEW_DIR, previewFilename);
+  await fs.mkdir(VARS.STATIC_STORAGE_PREVIEW, { recursive: true });
+  const previewPath = path.join(VARS.STATIC_STORAGE_PREVIEW, previewFilename);
 
   if (file.mimetype.startsWith('image/')) {
     const inputBuffer = await fs.readFile(file.path);

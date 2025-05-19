@@ -88,4 +88,5 @@ export class CreateMediaDto extends PickType(MediaDto, [
   'name',
   'description',
   'categories',
+  'authorName',
 ] as const) {}

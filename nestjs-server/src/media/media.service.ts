@@ -1,4 +1,4 @@
-// media/media.service.ts
+// src/media/media.service.ts
 
 import {
   BadRequestException,
@@ -11,6 +11,9 @@ import { Media, MediaDocument } from '../schemas/media.schema';
 import { CreateMediaDto, MediaDto } from 'src/dto/media.dto';
 import { generatePreview } from './media.generate.preview';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
+import { fileTypeFromBuffer } from 'file-type';
+import { promises as fs } from 'fs';
+import { CategoryDto } from 'src/dto/category.dto';
 
 @Injectable()
 export class MediaService {
@@ -25,36 +28,42 @@ export class MediaService {
     dto: CreateMediaDto,
     file: Express.Multer.File,
   ): Promise<MediaDto> {
-    let type = 'no-type';
+    if (!file) {
+      throw new BadRequestException('No file received');
+    }
 
-    if (file.mimetype.startsWith('image/')) type = 'image';
-    else if (file.mimetype.startsWith('video/')) type = 'video';
-    else throw new BadRequestException('Wrong upload file format');
+    const filePath = file.path;
+    const buffer = await fs.readFile(filePath);
+    const type = await fileTypeFromBuffer(buffer);
+    if (
+      !type ||
+      (!type.mime.startsWith('image/') && !type.mime.startsWith('video/'))
+    ) {
+      throw new BadRequestException('Invalid or corrupted file');
+    }
 
     const previewName = await generatePreview(file);
 
-    const providedCategories = dto.categories;
-
-    if (!Array.isArray(providedCategories)) {
+    if (!Array.isArray(dto.categories)) {
       throw new BadRequestException('No categories provided');
     }
 
-    const catNames = new Set<string>();
-
-    // Sequentially await each upsert
-    for (const cat of providedCategories) {
-      await this.categoryModel.findOneAndUpdate(
-        { name: cat },
-        { name: cat },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-      );
-      catNames.add(cat);
-    }
-
+    // Upsert categories and collect their names
+    const catDocs = await Promise.all(
+      dto.categories.map((name) =>
+        this.categoryModel
+          .findOneAndUpdate(
+            { name },
+            { name },
+            { upsert: true, new: true, setDefaultsOnInsert: true },
+          )
+          .exec(),
+      ),
+    );
     const doc = {
       ...dto,
-      type,
-      categories: [...catNames],
+      type: type.mime.startsWith('image/') ? 'image' : 'video',
+      categories: Array.from(new Set(catDocs.map((c) => c._id))),
       previewUrl: previewName,
       authorName: 'from-auth',
       url: file.filename,
@@ -63,51 +72,55 @@ export class MediaService {
       rating: 0,
     };
 
-    const res = await this.mediaModel.create(doc);
-    return { ...res.toObject(), categories: [...catNames] };
+    const created = await this.mediaModel.create(doc);
+    return created.populate('categories', 'name');
   }
 
   async rateMedia(mediaId: Types.ObjectId, rate: number): Promise<MediaDto> {
     const media = await this.mediaModel.findById(mediaId);
-
     if (!media) throw new NotFoundException('Media not found');
-
     media.rating += rate;
-    return await media.save();
+    const updated = await media.save();
+    return updated.populate('categories', 'name');
   }
 
-  async findAll(
-    page = 1,
-    limit = 12,
-  ): Promise<{ data: MediaDto[]; total: number }> {
+  async getCategories(): Promise<CategoryDto[]> {
+    const res = await this.categoryModel.find().exec();
+    return res.map((e) => ({ _id: e._id, name: e.name }));
+  }
+
+  async getMediaByCategories(
+    page: number,
+    limit: number,
+    categoryIds: string[],
+  ): Promise<any> {
+    //{ data: MediaDto[]; total: number }
     const skip = (page - 1) * limit;
+    const filter: any = {};
+    if (categoryIds.length) {
+      const objectIds = categoryIds.map((id) => {
+        if (!Types.ObjectId.isValid(id)) {
+          throw new BadRequestException(`Invalid category id: ${id}`);
+        }
+        return new Types.ObjectId(id);
+      });
+      filter.categories = { $in: objectIds };
+    }
 
     const [docs, total] = await Promise.all([
       this.mediaModel
-        .find()
+        .find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
+        .populate('categories', 'name')
         .exec(),
-      this.mediaModel.countDocuments().exec(),
+      this.mediaModel.countDocuments(filter).exec(),
     ]);
 
-    const data: MediaDto[] = docs.map((doc) => ({
-      _id: doc._id,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-      name: doc.name,
-      type: doc.type,
-      authorName: doc.authorName,
-      url: doc.url,
-      previewUrl: doc.previewUrl,
-      mimeType: doc.mimeType,
-      description: doc.description,
-      categories: doc.categories,
-      sizeBytes: doc.sizeBytes,
-      rating: doc.rating,
-    }));
-
-    return { data, total };
+    return {
+      data: docs,
+      total,
+    };
   }
 }

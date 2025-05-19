@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Category } from './category.schema';
 
 export type MediaDocument = Media & Document;
 
@@ -35,8 +36,12 @@ export class Media {
   @Prop({ required: false })
   description: string;
 
-  @Prop({ required: true })
-  categories: string[];
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: Category.name }],
+    default: [],
+    index: true,
+  })
+  categories: Types.ObjectId[];
 
   @Prop({ required: true })
   sizeBytes?: number;
