@@ -15,6 +15,12 @@ export class Media {
   @Prop({ required: true })
   name: string;
 
+  @Prop({ required: true })
+  previewSource: string;
+
+  @Prop({ required: true })
+  source: string;
+
   @Prop({
     required: true,
     enum: ['image', 'video'],
@@ -23,12 +29,6 @@ export class Media {
 
   @Prop({ required: true })
   authorName: string;
-
-  @Prop({ required: true })
-  url: string;
-
-  @Prop({ required: true })
-  previewUrl: string;
 
   @Prop({ required: true })
   mimeType: string;

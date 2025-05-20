@@ -4,6 +4,8 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
 
+RUN apk add --no-cache ffmpeg
+
 # Copy package.json only, then install (including devDeps)
 COPY package-lock.json ./
 COPY package.json ./
@@ -16,6 +18,8 @@ RUN npm run build
 # 2) Production stage
 FROM node:24-alpine
 WORKDIR /app
+
+RUN apk add --no-cache ffmpeg
 
 # Copy compiled output and node_modules from the builder
 COPY --from=builder /app/dist       ./dist

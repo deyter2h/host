@@ -16,7 +16,6 @@ import { diskStorage } from 'multer';
 import { MediaService } from './media.service';
 import { CreateMediaDto, MediaDto } from 'src/dto/media.dto';
 
-import { v4 as uuid4 } from 'uuid';
 import { Types } from 'mongoose';
 import { VARS } from 'src/vars.enum';
 import { CategoryDto } from 'src/dto/category.dto';
@@ -31,7 +30,7 @@ export class MediaController {
       storage: diskStorage({
         destination: VARS.STATIC_STORAGE as string,
         filename: (_req, file, cb) => {
-          const uniqueSuffix = `${uuid4()}`;
+          const uniqueSuffix = `${new Types.ObjectId()}`;
           const ext = file.originalname.split('.').pop();
           cb(null, `${uniqueSuffix}.${ext}`);
         },

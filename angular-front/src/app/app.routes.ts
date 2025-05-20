@@ -1,8 +1,3 @@
-// src/app/app.routes.ts
-import { Route }         from '@angular/router';
-import { MainPageComponent } from './main-page/main-page.component';
+import { Routes } from '@angular/router';
 
-export const routes: Route[] = [
-  { path: '', component: MainPageComponent },
-  { path: '**', redirectTo: '' }
-];
+export const routes: Routes = [];

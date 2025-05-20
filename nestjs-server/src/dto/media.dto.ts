@@ -38,6 +38,14 @@ export class MediaDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
+  previewSource: string;
+
+  @IsString()
+  @IsNotEmpty()
+  source: string;
+
   @ApiProperty({ enum: ['image', 'video'] })
   @IsEnum(['image', 'video'] as const)
   type: 'image' | 'video';
@@ -46,16 +54,6 @@ export class MediaDto {
   @IsString()
   @IsNotEmpty()
   authorName: string;
-
-  @ApiProperty({ description: 'URL медиа-файла' })
-  @IsString()
-  @IsNotEmpty()
-  url: string; //filepath for now
-
-  @ApiProperty({ description: 'URL preview медиа-файла' })
-  @IsString()
-  @IsNotEmpty()
-  previewUrl: string; //filepath for now
 
   @ApiProperty({ description: 'Описание медиа-файла' })
   @IsString()

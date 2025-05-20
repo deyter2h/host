@@ -43,11 +43,11 @@ export class MediaService {
       throw new BadRequestException('Invalid or corrupted file');
     }
 
-    const previewName = await generatePreview(file);
-
     if (!Array.isArray(dto.categories)) {
       throw new BadRequestException('No categories provided');
     }
+
+    const previewSource = await generatePreview(file);
 
     // Upsert categories and collect their names
     const catDocs = await Promise.all(
@@ -61,13 +61,15 @@ export class MediaService {
           .exec(),
       ),
     );
+
     const doc = {
       ...dto,
+      _id: new Types.ObjectId(file.filename.split('.')[0]),
+      source: file.filename,
+      previewSource,
       type: type.mime.startsWith('image/') ? 'image' : 'video',
       categories: Array.from(new Set(catDocs.map((c) => c._id))),
-      previewUrl: previewName,
       authorName: 'from-auth',
-      url: file.filename,
       mimeType: file.mimetype,
       sizeBytes: file.size,
       rating: 0,
