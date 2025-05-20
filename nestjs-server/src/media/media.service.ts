@@ -11,7 +11,6 @@ import { Media, MediaDocument } from '../schemas/media.schema';
 import { CreateMediaDto, MediaDto } from 'src/dto/media.dto';
 import { generatePreview } from './media.generate.preview';
 import { Category, CategoryDocument } from 'src/schemas/category.schema';
-import { fileTypeFromBuffer } from 'file-type';
 import { promises as fs } from 'fs';
 import { CategoryDto } from 'src/dto/category.dto';
 
@@ -32,9 +31,11 @@ export class MediaService {
       throw new BadRequestException('No file received');
     }
 
+    const fileTypeMod: any = await import('file-type');
+
     const filePath = file.path;
     const buffer = await fs.readFile(filePath);
-    const type = await fileTypeFromBuffer(buffer);
+    const type = await fileTypeMod.fileTypeFromBuffer(buffer);
     if (
       !type ||
       (!type.mime.startsWith('image/') && !type.mime.startsWith('video/'))

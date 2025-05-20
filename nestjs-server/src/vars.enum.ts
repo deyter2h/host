@@ -1,6 +1,6 @@
 export enum VARS {
-  STATIC_STORAGE = 'C:/my-site/uploads',
-  STATIC_STORAGE_PREVIEW = 'C:/my-site/uploads/previews',
-  MONGO_URL = 'mongodb://127.0.0.1:27017/media-host',
+  STATIC_STORAGE = '/usr/src/app/uploads',
+  STATIC_STORAGE_PREVIEW = '/usr/src/app/uploads/previews',
+  MONGO_URL = 'mongodb://mongo:27017/myapp',
   MAX_FILE_SIZE_MB = 500,
 }

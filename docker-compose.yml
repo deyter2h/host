@@ -1,21 +1,40 @@
-version: '3.8'
+version: "3.8"
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: ./angular-front/Dockerfile
-    image: my-app-nginx
-    ports:
-      - "80:80"
-    depends_on:
-      - nestjs
-
   nestjs:
     build:
       context: ./nestjs-server
       dockerfile: Dockerfile
     image: my-app-nest
     environment:
-      - NODE_ENV=production
-    expose:
-      - "3000"
+      - MONGODB_URI=mongodb://mongo:27017/myapp
+    volumes:
+      - uploads_data:/usr/src/app/uploads
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  frontend:
+    build:
+      context: ./angular-front
+      dockerfile: Dockerfile
+    image: my-app-frontend
+    volumes:
+      - uploads_data:/usr/share/nginx/html/uploads
+    depends_on:
+      - nestjs
+    ports:
+      - "80:80"
+
+volumes:
+  uploads_data:
+  mongo-data:
