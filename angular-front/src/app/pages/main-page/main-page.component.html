@@ -2,26 +2,33 @@
   <div class="filters-left">
     <mat-checkbox [(ngModel)]="showImages">Images</mat-checkbox>
     <mat-checkbox [(ngModel)]="showVideos">Videos</mat-checkbox>
-    <button mat-button>
+    <!-- Добавили (click) -->
+    <button mat-button (click)="openUpload()">
       Upload
     </button>
-    
   </div>
   <div class="filters-right">
     {{ username }}
   </div>
 </div>
 
-<div class="scroll-box" infiniteScroll [infiniteScrollDistance]="2" [infiniteScrollThrottle]="150"
-  (scrolled)="onScroll()">
+<div 
+  class="scroll-box" 
+  #scrollContainer
+  infiniteScroll
+  [infiniteScrollContainer]="scrollContainer"
+  [infiniteScrollDistance]="2"
+  [infiniteScrollThrottle]="150"
+  (scrolled)="onScroll()"
+>
 
   <div class="media-grid">
     <mat-card *ngFor="let m of filteredMedia; trackBy: trackById" class="media-card">
       <div class="media-preview">
-        <img *ngIf="m.type === 'image'" [src]="env.previewsUrl + m.previewSource" [alt]="m.name" loading="lazy" />
+        <img *ngIf="m.type === 'image'" [src]=" '/uploads/previews/' + m.previewSource" [alt]="m.name" loading="lazy" />
 
         <div *ngIf="m.type === 'video'" class="video-wrapper">
-          <img class="video-thumb" [src]="env.previewsUrl + m.previewSource" [alt]="m.name" loading="lazy" />
+          <img class="video-thumb" [src]="'/uploads/previews/' + m.previewSource" [alt]="m.name" loading="lazy" />
           <div class="play-icon"></div>
         </div>
       </div>

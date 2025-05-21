@@ -1,0 +1,17 @@
+/* media-form.component.scss */
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}

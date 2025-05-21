@@ -6,7 +6,7 @@ import { MediaModel } from '../models/media-model';
 
 @Injectable({ providedIn: 'root' })
 export class MediaService {
-  private readonly API = 'http://localhost:3000/api/media';
+  private readonly API = 'api/media';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -24,20 +24,8 @@ export class MediaService {
   }
 
   uploadMedia(
-    file: File,
-    name: string,
-    authorName: string,
-    categories: string[]
+    fd: FormData
   ): Observable<MediaModel> {
-    const form = new FormData();
-    form.append('file', file);
-    form.append('authorName', authorName);
-    form.append('name', name);
-    // if your backend expects categories[] fields:
-    categories.forEach(cat => form.append('categories', cat));
-    // if it expects a JSON array instead, do:
-    // form.append('categories', JSON.stringify(categories));
-
-    return this.http.post<MediaModel>(this.API, form);
+    return this.http.post<MediaModel>(this.API, fd);
   }
 }

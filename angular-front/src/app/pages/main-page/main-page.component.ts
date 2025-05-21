@@ -1,12 +1,20 @@
+// main-page.component.ts
 import { Component, OnInit }                  from '@angular/core';
 import { CommonModule }                       from '@angular/common';
 import { FormsModule }                        from '@angular/forms';
 import { InfiniteScrollModule }               from 'ngx-infinite-scroll';
 import { MatCardModule }                      from '@angular/material/card';
 import { MatCheckboxModule }                  from '@angular/material/checkbox';
-import { MediaService } from '../../api-calls/getMedia';
-import { MediaModel } from '../../models/media-model';
-import { environment } from '../../env';
+import { MatDialogModule, MatDialog }         from '@angular/material/dialog';
+
+import { MediaService }                       from '../../api-calls/getMedia';
+import { MediaModel }                         from '../../models/media-model';
+import { environment }                        from '../../env';
+import { MediaFormComponent } from '../upload-page/media-form.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-main-page',
@@ -15,8 +23,13 @@ import { environment } from '../../env';
     CommonModule,
     FormsModule,
     InfiniteScrollModule,
-    MatCardModule,
+    MatCardModule,        // <-- здесь и лежит MatCardActions
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
     MatCheckboxModule,
+    MatDialogModule,                             // <-- добавили MatDialogModule
   ],
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
@@ -28,16 +41,34 @@ export class MainPage implements OnInit {
   loading = false;
   hasMore = true;
   username = 'Default';
-  selectedFile: File | null = null;
   env = environment;
 
   showImages = true;
   showVideos = true;
 
-  constructor(private mediaService: MediaService) {}
+  constructor(
+    private mediaService: MediaService,
+    private dialog: MatDialog               // <-- внедрили MatDialog
+  ) {}
 
   ngOnInit() {
     this.loadNext();
+  }
+
+  /** Открывает форму загрузки в диалоге */
+  openUpload() {
+    const dialogRef = this.dialog.open(MediaFormComponent, {
+      width: '600px',
+      // можно передать данные в форму через data: { … }
+    });
+
+    dialogRef.afterClosed().subscribe((newMedia: MediaModel|undefined) => {
+    if (newMedia) {
+      // Вариант A: просто влезаем в начало массива,
+      // чтобы он сразу показался пользователю
+      this.mediaList = [newMedia, ...this.mediaList];
+    }
+  });
   }
 
   get filteredMedia() {
@@ -61,8 +92,7 @@ export class MainPage implements OnInit {
       this.page++;
       this.loading   = false;
     });
-  
-}
+  }
 
   trackById(_: number, item: MediaModel) {
     return item._id;
