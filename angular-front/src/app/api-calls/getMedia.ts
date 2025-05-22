@@ -3,11 +3,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MediaModel } from '../models/media-model';
+import { environment } from '../env';
 
 @Injectable({ providedIn: 'root' })
 export class MediaService {
-  private readonly API = 'api/media';
-
   constructor(private readonly http: HttpClient) {}
 
   getMedia(
@@ -18,7 +17,7 @@ export class MediaService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<{ data: MediaModel[]; total: number }>(this.API, {
+    return this.http.get<{ data: MediaModel[]; total: number }>(environment.mediaUrl, {
       params,
     });
   }
@@ -26,6 +25,6 @@ export class MediaService {
   uploadMedia(
     fd: FormData
   ): Observable<MediaModel> {
-    return this.http.post<MediaModel>(this.API, fd);
+    return this.http.post<MediaModel>(environment.mediaUrl, fd);
   }
 }

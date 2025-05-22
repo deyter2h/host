@@ -2,3 +2,19 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+:host ::ng-deep {
+  .compact-field .mat-form-field-flex {
+    background-color: #fff !important;
+  }
+  .compact-field.mat-form-field-appearance-outline 
+    .mat-form-field-outline {
+    stroke: #fff !important;
+  }
+  .compact-field .mat-input-element {
+    color: #000 !important;
+  }
+  .compact-field .mat-input-element::placeholder {
+    color: rgba(0,0,0,0.6) !important;
+  }
+}

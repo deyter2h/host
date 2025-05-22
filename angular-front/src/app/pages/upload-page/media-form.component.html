@@ -11,7 +11,6 @@
         </mat-error>
       </mat-form-field>
 
-      <!-- Название -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Название</mat-label>
         <input matInput formControlName="name" placeholder="Введите название" />
@@ -20,7 +19,6 @@
         </mat-error>
       </mat-form-field>
 
-      <!-- Список тегов -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Теги</mat-label>
         <mat-select formControlName="categories" multiple>
@@ -34,11 +32,8 @@
       </mat-form-field>
 
       <div class="file-input-wrapper">
-        <!-- Скрываем input, но не через display:none (нормально работает с label) -->
         <input type="file" id="file" (change)="onFileSelected($event)"
           style="width:0;height:0;opacity:0;position:absolute;z-index:-1;" />
-
-        <!-- Label сам по себе — mat-кнопка -->
         <label for="file" mat-raised-button color="primary" class="mat-button">
           Выбрать файл
         </label>
